@@ -25,3 +25,5 @@ the value the oc_start.txt file will be used to set performance mode, pl, mem , 
 when done:
 `./oc-amd.sh reset`
 
+
+CCX-mining.service.template is provided as a guide on how to insert the command to start and reset OC.
