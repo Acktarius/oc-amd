@@ -1,4 +1,4 @@
-# oc-nvidia
+# oc-amd
 
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
@@ -6,28 +6,22 @@ ideally place in the /opt folder
 
 `cd /opt`
 
-`git clone https://github.com/Acktarius/oc-nvidia.git`
+`git clone https://github.com/Acktarius/oc-amd.git`
 
-`cd oc-nvidia`
+`cd oc-amd`
 
-`sudo chmod 755 oc-nvidia.sh`
+`sudo chmod 755 oc-amd.sh`
 
 
-oc-nvidia is a bash script which can be launch as a service to setup overclock pre mining operation.
+oc-amd is a bash script which can be launch as a service to setup overclock pre mining operation.
 
-`sudo ./oc-nvidia.sh`
+`sudo ./oc-amd.sh`
 
-the value will be defaulted to the one in the oc_start.txt file
-or can be set using parameter : 
-* power limit in W :
-`pl`
-* core clock offset :
-`cc`
-* memory clock offset :
-`mc`
-* fan speed for a two fan gpu in % :
-`fs`
+the value the oc_start.txt file will be used to set performance mode, pl, mem , fan
 
 ## Exemple
-`sudo ./oc-nvidia.sh fs 80 cc 100 mc -500 pl 100`
+`./oc-amd.sh`
+
+when done:
+`./oc-amd.sh reset`
 
