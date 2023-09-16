@@ -2,4 +2,4 @@ perf = manual
 pl = 28
 mclk = 1
 fmode = 1
-fspeed = 160
+fspeed = 140
