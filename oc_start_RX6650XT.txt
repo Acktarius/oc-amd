@@ -1,6 +1,6 @@
 perf = manual
 profile = COMPUTE
 pl = 80
-mclk = 2
+mclk = 1
 fmode = 1
-fspeed = 125
+fspeed = 130
