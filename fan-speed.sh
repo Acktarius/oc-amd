@@ -23,21 +23,44 @@ esac
 # get path to card
 path2card=$(readlink -f /sys/class/drm/card0/device)
 device=$(cat ${path2card}/device)
-testgpu=$(glxinfo | grep -c "RX 6400")
-if [[ "$device" != "0x743f" ]] || [[ $testgpu -lt 1 ]]; then
-
-echo "your gpu doesn't seem to be a RX 6400"
+#testgpu=$(glxinfo | grep -c "RX 6400")
+if [[ "${device}" != "0x743f" ]] && [[ "${device}" != "0x73ff" ]] && [[ "${device}" != "0x73ef" ]] ; then
+echo "your gpu is not supported"
 sleep 2
 exit
 
 else
+
+case "$device" in
+# RX6400
+        "0x743f")
+link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6400.txt"
+frisk=125
+        ;;
+# RX6600
+        "0x73ff")
+link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6600.txt"
+frisk=90
+        ;;
+# RX 6650XT
+        "0x73ef")
+link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6650XT.txt"
+frisk=90
+        ;;
+        *)
+echo "unexpected error"
+sleep 2
+exit
+	;;
+esac
+
 
 #get actual edge temp
 gput=$(sensors | grep "edge" | cut -d "+" -f 2 | cut -d "." -f 1)
 echo -e "actual gpu edge temperature is ${ORANGE}${gput}${TURNOFF}"
 #fan present mining setting
 fspeed=$(cat ${path2card}/hwmon/hwmon*/pwm1)
-fspeedoc=$(cat /opt/conceal-toolbox/oc-amd/oc_start.txt | grep 'fspeed' | cut -d " " -f 3)
+fspeedoc=$(cat $link2oc | grep 'fspeed' | cut -d " " -f 3)
 fmax=$(cat ${path2card}/hwmon/hwmon*/pwm1_max)
 fmode=$(cat ${path2card}/hwmon/hwmon*/pwm1_enable)
 
@@ -75,7 +98,7 @@ exit
 	;;
 	"for now and next boot")
 echo $1 > ${path2card}/hwmon/hwmon*/pwm1
-echo "$(awk -v new="$1" '$1 ~ /fspeed$/ {$3 = new}1' /opt/conceal-toolbox/oc-amd/oc_start.txt)" > /opt/conceal-toolbox/oc-amd/oc_start.txt
+echo "$(awk -v new="$1" '$1 ~ /fspeed$/ {$3 = new}1' $link2oc)" > $link2oc
 echo -e "${ORANGE}${1}${TURNOFF} as been applied and recorded in overclock parameters"
 	;;
 	*)
@@ -97,13 +120,13 @@ read answer
 case "$answer" in
         [dD])
 #question
-echo -e "${GRIS}which fan speed would you like, between: 125 to ${fmax}?${ORANGE} below 125 at your own risk !${WHITE}"
+echo -e "${GRIS}which fan speed would you like, between: $frisk to ${fmax}?${ORANGE} below $frisk at your own risk !${WHITE}"
 read fspeedn
-if [[ $fspeedn =~ ^[0-9]+$ ]] && (( ${fspeedn} > 124 )) && (( ${fspeedn} < ${fmax} )); then
+if [[ $fspeedn =~ ^[0-9]+$ ]] && (( ${fspeedn} > (( $frisk - 1)) )) && (( ${fspeedn} < ${fmax} )); then
 
 implement ${fspeedn}
-# less than 125
-elif [[ $fspeedn =~ ^[0-9]+$ ]] && (( ${fspeedn} > 0 )) && (( ${fspeedn} < 125 )); then
+# less than frisk
+elif [[ $fspeedn =~ ^[0-9]+$ ]] && (( ${fspeedn} > 0 )) && (( ${fspeedn} < $frisk )); then
 zenity --warning --title "CONFIRM TO PROCEED" --width 400 --height 80 --text "Implement ${fspeedn}  ... at your own risk ?"
 sleep 1
 implement ${fspeedn}
@@ -155,14 +178,14 @@ echo -e "${GRIS}Would you like to implement fan speed at next miner restart ? ($
 read answer2
 case "$answer2" in
 	[yY])
-	echo "$(awk -v new="$fspeedx" '$1 ~ /fspeed$/ {$3 = new}1' /opt/conceal-toolbox/oc-amd/oc_start.txt)" > /opt/conceal-toolbox/oc-amd/oc_start.txt
+	echo "$(awk -v new="$fspeedx" '$1 ~ /fspeed$/ {$3 = new}1' $link2oc)" > $link2oc
 	;;
 	[nN])
 echo "${TURNOFF}fan speed will remain default back at nex boot"
 	;;
 	*)
 echo -e "${ORANGE}invalid answer, nothing will be done${TURNOFF}"
-fspeed=$(cat /opt/conceal-toolbox/oc-amd/oc_start.txt | grep 'fspeed' | cut -d " " -f 3)
+fspeed=$(cat $link2oc | grep 'fspeed' | cut -d " " -f 3)
 echo $fspeed > ${path2card}/hwmon/hwmon*/pwm1
 	;;
 esac
