@@ -1,0 +1,6 @@
+perf = manual
+profile = COMPUTE
+pl = 80
+mclk = 2
+fmode = 1
+fspeed = 125
