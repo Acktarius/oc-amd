@@ -20,9 +20,15 @@ case "$TERM" in
         ;;
 esac
 
+#trip
+trip() {
+kill -INT $$
+}
+
 # get path to card
 path2card=$(readlink -f /sys/class/drm/card0/device)
 device=$(cat ${path2card}/device)
+revision=$(cat ${path2card}/revision)
 #testgpu=$(glxinfo | grep -c "RX 6400")
 if [[ "${device}" != "0x743f" ]] && [[ "${device}" != "0x73ff" ]] && [[ "${device}" != "0x73ef" ]] ; then
 echo "your gpu is not supported"
@@ -31,28 +37,68 @@ exit
 
 else
 
+#fetch overclocks
+
 case "$device" in
-# RX6400
-        "0x743f")
-link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6400.txt"
-frisk=125
-        ;;
-# RX6600
-        "0x73ff")
-link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6600.txt"
-frisk=90
-        ;;
+# RX6400 or RX6500 or RX6500XT
+	"0x743f")
+	case "$revision" in
+		"0xc7")
+		card="RX6400"
+		;;
+		"0xc3")
+		card="RX6500"
+		;;
+		"0xc1")
+		card="RX6500XT"
+		;;
+		*)
+		echo "unexpected card revision"
+		trip
+		;;
+	esac
+	;;
+# RX6600 series
+	"0x73ff")
+	case "$revision" in
+		"0xc7")
+		card="RX6600"
+		;;
+		"0xc1")
+		card="RX6600XT"
+		;;
+		*)
+		echo "unexpected card revision"
+                trip
+		;;
+	esac
+	;;
 # RX 6650XT
-        "0x73ef")
-link2oc="/opt/conceal-toolbox/oc-amd/oc_start_RX6650XT.txt"
-frisk=90
-        ;;
-        *)
+	"0x73ef")
+	case "$revision" in
+		"0xc1")
+		card="RX6650XT"
+		;;
+		*)
+		echo "unexpected card revision"
+                trip
+		;;
+	esac
+	;;
+	*)
 echo "unexpected error"
 sleep 2
 exit
 	;;
 esac
+
+link2oc="/opt/conceal-toolbox/oc-amd/oc_start_${card}.txt"
+
+#check oc file exist	
+if [[ ! -f "$link2oc" ]]; then
+echo "no oc file"
+trip
+fi
 
 
 #get actual edge temp
@@ -63,6 +109,8 @@ fspeed=$(cat ${path2card}/hwmon/hwmon*/pwm1)
 fspeedoc=$(cat $link2oc | grep 'fspeed' | cut -d " " -f 3)
 fmax=$(cat ${path2card}/hwmon/hwmon*/pwm1_max)
 fmode=$(cat ${path2card}/hwmon/hwmon*/pwm1_enable)
+frisk=125
+
 
 #presentation
 clear
@@ -120,7 +168,7 @@ read answer
 case "$answer" in
         [dD])
 #question
-echo -e "${GRIS}which fan speed would you like, between: $frisk to ${fmax}?${ORANGE} below $frisk at your own risk !${WHITE}"
+echo -e "${GRIS}which fan speed would you like, between: ${frisk} to ${fmax}?${ORANGE} below ${frisk} at your own risk !${WHITE}"
 read fspeedn
 if [[ $fspeedn =~ ^[0-9]+$ ]] && (( ${fspeedn} > (( $frisk - 1)) )) && (( ${fspeedn} < ${fmax} )); then
 
@@ -181,7 +229,7 @@ case "$answer2" in
 	echo "$(awk -v new="$fspeedx" '$1 ~ /fspeed$/ {$3 = new}1' $link2oc)" > $link2oc
 	;;
 	[nN])
-echo "${TURNOFF}fan speed will remain default back at nex boot"
+echo "${TURNOFF}fan speed will remain default back at next boot"
 	;;
 	*)
 echo -e "${ORANGE}invalid answer, nothing will be done${TURNOFF}"
@@ -198,7 +246,7 @@ esac
 
 else
 echo -e "${GRIS}fan has to be in manual mode to have this script running,\nconsider coming back when mining.${TURNOFF} Bye, now !"
-sleep 2
+sleep 4
 fi
 exit
 
