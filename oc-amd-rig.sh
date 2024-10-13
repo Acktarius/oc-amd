@@ -19,20 +19,18 @@ echo $(readlink -f "/sys/class/drm/card${1}/device")
 }
 
 # loop through cards
-for ((i = 1 ; i < 10 ; i++)); do
+for ((i = 0 ; i < 10 ; i++)); do
     if [[ ! -d $(path2card $i) ]]; then
     break
     fi
         pathToCard=$(path2card $i)
         device=$(echo $(cat ${pathToCard}/device))
         revision=$(echo $(cat ${pathToCard}/revision)) || $(echo "null")
-        echo "gpu: ${device}, revision: ${revision}"
         card=$(source check_device.sh $device $revision)
-        echo $card
         ocFile="oc_start_${card}.txt"
-        #check oc file exist	
+        #check oc file exist
         if [[ ! -f "$ocFile" ]]; then
-        echo "no oc file for ${card}"
+        echo "no oc file for card${i} : ${card}"
         else
             # oc or reset ?
             case "$1" in
@@ -45,7 +43,8 @@ for ((i = 1 ; i < 10 ; i++)); do
             echo 2 > ${pathToCard}/hwmon/hwmon*/pwm1_enable
             #Set performance to auto
             echo "auto" > ${pathToCard}/power_dpm_force_performance_level
-                ;;
+            echo -e "card${i} : ${card} overclocks reset" 
+		 ;;
                 *)
             #set  Performance to manual ------------------------------------------------------------- < over-clocking
             echo "manual" > ${pathToCard}/power_dpm_force_performance_level
@@ -72,10 +71,8 @@ for ((i = 1 ; i < 10 ; i++)); do
             #set fan speed
             fspeed=$(cat $ocFile | grep 'fspeed' | cut -d " " -f 3)
             echo $fspeed > ${pathToCard}/hwmon/hwmon*/pwm1    
+	    echo  -e "oc applied to card${i} : ${card} \n"
                 ;;
             esac
         fi
-((i++))
 done
-
-
