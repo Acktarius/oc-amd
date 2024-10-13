@@ -18,7 +18,7 @@ kill -INT $$
 case "$1" in
 # RX6400 or RX6500 or RX6500XT
 	"0x743f")
-	case "$$2" in
+	case "$2" in
 		"0xc7")
 		card="RX6400"
 		;;
@@ -29,14 +29,13 @@ case "$1" in
 		card="RX6500XT"
 		;;
 		*)
-		echo "unexpected card revision"
-		trip
+		card="unknown"
 		;;
 	esac
 	;;
 # RX6600 series
 	"0x73ff")
-	case "$$2" in
+	case "$2" in
 		"0xc7")
 		card="RX6600"
 		;;
@@ -44,27 +43,36 @@ case "$1" in
 		card="RX6600XT"
 		;;
 		*)
-		echo "unexpected card revision"
-                trip
+		card="unknown"
 		;;
 	esac
 	;;
 # RX 6650XT
 	"0x73ef")
-	case "$$2" in
+	case "$2" in
 		"0xc1")
 		card="RX6650XT"
 		;;
 		*)
-		echo "unexpected card revision"
-                trip
+		card="unknown"
 		;;
 	esac
 	;;
+# RX 6800
+       "0x73bf")
+        case "$2" in
+                "0xc3")
+                card="RX6800"
+                ;;
+                *)
+                card="unknown"
+                ;;
+        esac
+        ;;
 	*)
-echo "unexpected error or unknown card"
-sleep 2
-exit
+	card="unknown"
+	sleep 2
+	exit
 	;;
 esac
 echo $card
