@@ -1,7 +1,7 @@
 perf = manual
 profile = CUSTOM
-baseCclk = 900
-boostCclk = 680
+baseCclk = 1000
+boostCclk = 948
 pl = 175
 odsclk = 2440
 sclk = 2
