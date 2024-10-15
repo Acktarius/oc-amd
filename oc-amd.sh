@@ -7,6 +7,10 @@
 #testgpu=$(glxinfo | grep -c "RX 6400")
 # Variables and functions
 
+
+#declaration variables and functions
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 #trip
 trip() {
 kill -INT $$
@@ -30,61 +34,10 @@ sleep 2
 exit
 else
 
+
 #fetch overclocks
-
-case "$device" in
-# RX6400 or RX6500 or RX6500XT
-	"0x743f")
-	case "$revision" in
-		"0xc7")
-		card="RX6400"
-		;;
-		"0xc3")
-		card="RX6500"
-		;;
-		"0xc1")
-		card="RX6500XT"
-		;;
-		*)
-		echo "unexpected card revision"
-		trip
-		;;
-	esac
-	;;
-# RX6600 series
-	"0x73ff")
-	case "$revision" in
-		"0xc7")
-		card="RX6600"
-		;;
-		"0xc1")
-		card="RX6600XT"
-		;;
-		*)
-		echo "unexpected card revision"
-                trip
-		;;
-	esac
-	;;
-# RX 6650XT
-	"0x73ef")
-	case "$revision" in
-		"0xc1")
-		card="RX6650XT"
-		;;
-		*)
-		echo "unexpected card revision"
-                trip
-		;;
-	esac
-	;;
-	*)
-echo "unexpected error"
-sleep 2
-exit
-	;;
-esac
-
+card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
+echo $card
 link2oc="/opt/conceal-toolbox/oc-amd/oc_start_${card}.txt"
 
 #check oc file exist	
@@ -125,13 +78,29 @@ fi
 #set power profile
 #get index value of profile mode
 profile=$(cat $link2oc | grep 'profile' | cut -d " " -f 3)
+if [[ "$profile" != "CUSTOM" ]]; then 
 mode=$(cat ${path2card}/pp_power_profile_mode | grep $profile | tr -s " " | cut -d " " -f 2)
-if  [[ "$mode" =~ ^[0-9]+$ ]]; then
+	if  [[ "$mode" =~ ^[0-9]+$ ]]; then
 	echo $mode > ${path2card}/pp_power_profile_mode
+	fi
+else
+declare -a neutral
+neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${path2card}))
+neutral[4]=$(cat $link2oc | grep 'baseCclk' | cut -d " " -f 3)
+neutral[6]=$(cat $link2oc | grep 'boostCclk' | cut -d " " -f 3)
+echo "6 ${neutral[@]}" > ${path2card}/pp_power_profile_mode
 fi
+
 #set value for mem
 mclk=$(cat $link2oc | grep 'mclk' | cut -d " " -f 3)
 echo $mclk > ${path2card}/pp_dpm_mclk
+
+#VDD_OFFSET
+vo=$(cat $link2oc | grep 'vo' | cut -d " " -f 3)
+echo "vo ${vo}" >  ${path2card}/pp_od_clk_voltage
+#COMMIT PP_OD_CLK_VOLTAGE
+echo "c" >  ${path2card}/pp_od_clk_voltage
+
 #set fan manual
 fmode=$(cat $link2oc | grep 'fmode' | cut -d " " -f 3)
 echo $fmode > ${path2card}/hwmon/hwmon*/pwm1_enable
