@@ -69,10 +69,10 @@ for ((i = 0 ; i < 10 ; i++)); do
 	     # CUSTOM selected, injection of Base clock and boost
 	    else
             declare -a neutral
-            neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${path2card}))
-            neutral[4]=$(cat $link2oc | grep 'baseCclk' | cut -d " " -f 3)
-            neutral[6]=$(cat $link2oc | grep 'boostCclk' | cut -d " " -f 3)
-            echo "6 ${neutral[@]}" > ${path2card}/pp_power_profile_mode
+            neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${pathTocard}))
+            neutral[4]=$(cat $ocFile | grep 'baseCclk' | cut -d " " -f 3)
+            neutral[6]=$(cat $ocFile | grep 'boostCclk' | cut -d " " -f 3)
+            echo "6 ${neutral[@]}" > ${pathTocard}/pp_power_profile_mode
             unset neutral
 	    fi
             
