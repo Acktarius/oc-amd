@@ -87,10 +87,9 @@ for ((i = 0 ; i < 10 ; i++)); do
 
             #set value for core clock
             sclk=$(cat $ocFile | grep 'sclk' | cut -d " " -f 3)
-            echo $sclk > ${pathToCard}/pp_dpm_sclk
+            echo "${sclk}" > ${pathToCard}/pp_dpm_sclk
             #set value for mem
             mclk=$(cat $ocFile | grep 'mclk' | cut -d " " -f 3)
-            echo $mclk > ${pathToCard}/pp_dpm_mclk
 
             #set fan manual
             fmode=$(cat $ocFile | grep 'fmode' | cut -d " " -f 3)
