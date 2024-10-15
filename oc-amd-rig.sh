@@ -63,26 +63,35 @@ for ((i = 0 ; i < 10 ; i++)); do
             profile=$(cat $ocFile | grep 'profile' | cut -d " " -f 3)
             mode=$(cat ${pathToCard}/pp_power_profile_mode | grep $profile | tr -s " " | cut -d " " -f 2)
             if [[ "$profile" != "CUSTOM" ]]; then 
-	     if  [[ "$mode" =~ ^[0-9]+$ ]]; then
+	            if  [[ "$mode" =~ ^[0-9]+$ ]]; then
                 echo $mode > ${pathToCard}/pp_power_profile_mode
-            	fi
+                fi
 	     # CUSTOM selected, injection of Base clock and boost
 	    else
-	declare -a neutral
-	neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${path2card}))
-	neutral[4]=$(cat $link2oc | grep 'baseCclk' | cut -d " " -f 3)
-	neutral[6]=$(cat $link2oc | grep 'boostCclk' | cut -d " " -f 3)
-	echo "6 ${neutral[@]}" > ${path2card}/pp_power_profile_mode
- 	unset neutral
+            declare -a neutral
+            neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${path2card}))
+            neutral[4]=$(cat $link2oc | grep 'baseCclk' | cut -d " " -f 3)
+            neutral[6]=$(cat $link2oc | grep 'boostCclk' | cut -d " " -f 3)
+            echo "6 ${neutral[@]}" > ${path2card}/pp_power_profile_mode
+            unset neutral
 	    fi
-            #set value for mem
-            mclk=$(cat $ocFile | grep 'mclk' | cut -d " " -f 3)
-            echo $mclk > ${pathToCard}/pp_dpm_mclk
+            
+            #OS_SCLK
+            odsclk=$(cat $ocFile | grep 'odsclk' | cut -d " " -f 3)
+            echo "s 1 ${odsclk}" >  ${pathToCard}/pp_od_clk_voltage
             #VDD_OFFSET
             vo=$(cat $ocFile | grep 'vo' | cut -d " " -f 3)
             echo "vo ${vo}" >  ${pathToCard}/pp_od_clk_voltage
             #COMMIT PP_OD_CLK_VOLTAGE
             echo "c" >  ${pathToCard}/pp_od_clk_voltage
+
+            #set value for core clock
+            sclk=$(cat $ocFile | grep 'sclk' | cut -d " " -f 3)
+            echo $sclk > ${pathToCard}/pp_dpm_sclk
+            #set value for mem
+            mclk=$(cat $ocFile | grep 'mclk' | cut -d " " -f 3)
+            echo $mclk > ${pathToCard}/pp_dpm_mclk
+
             #set fan manual
             fmode=$(cat $ocFile | grep 'fmode' | cut -d " " -f 3)
             echo $fmode > ${pathToCard}/hwmon/hwmon*/pwm1_enable

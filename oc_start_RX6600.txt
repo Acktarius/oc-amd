@@ -1,6 +1,11 @@
 perf = manual
-profile = COMPUTE
+profile = CUSTOM
+baseCclk = 1000
+boostCclk = 880
 pl = 94
+odsclk = 2440
+sclk = 2
 mclk = 1
 fmode = 1
 fspeed = 175
+vo = -80

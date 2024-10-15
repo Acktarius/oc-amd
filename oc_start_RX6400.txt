@@ -1,7 +1,12 @@
 perf = manual
-profile = POWER_SAVING
-pl = 28
+profile = CUSTOM
+baseCclk = 900
+boostCclk = 680
+pl = 40
 mclk = 1
 fmode = 1
 fspeed = 140
 vo = -80
+
+
+
