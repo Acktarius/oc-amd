@@ -65,6 +65,11 @@ for ((i = 0 ; i < 10 ; i++)); do
             #set value for mem
             mclk=$(cat $ocFile | grep 'mclk' | cut -d " " -f 3)
             echo $mclk > ${pathToCard}/pp_dpm_mclk
+            #VDD_OFFSET
+            vo=$(cat $ocFile | grep 'vo' | cut -d " " -f 3)
+            echo $vo >  pp_od_clk_voltage
+            #COMMIT PP_OD_CLK_VOLTAGE
+            echo "c" >  pp_od_clk_voltage
             #set fan manual
             fmode=$(cat $ocFile | grep 'fmode' | cut -d " " -f 3)
             echo $fmode > ${pathToCard}/hwmon/hwmon*/pwm1_enable
