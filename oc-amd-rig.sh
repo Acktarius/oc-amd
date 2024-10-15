@@ -86,7 +86,7 @@ for ((i = 0 ; i < 10 ; i++)); do
             echo "c" >  ${pathToCard}/pp_od_clk_voltage
 
             #set value for core clock
-            sclk=$(cat $ocFile | grep 'sclk' | cut -d " " -f 3)
+            sclk=$(cat $ocFile | grep 'Sclk' | cut -d " " -f 3)
             echo "${sclk}" > ${pathToCard}/pp_dpm_sclk
             #set value for mem
             mclk=$(cat $ocFile | grep 'mclk' | cut -d " " -f 3)
