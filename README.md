@@ -38,7 +38,7 @@ This script will go through all your cards and if find an oc_start_*.txt file wi
 ---
 
 ## Modify core clock  
-*this is not taken care of by the script, follow the next steps if you wish to change those values*  
+*this is only not taken care of by the rig script, follow the next steps if you wish to change those values*  
 ### reference : [https://wiki.gentoo.org/wiki/AMDGPU](https://wiki.gentoo.org/wiki/AMDGPU)  
 *exemple for card0, as root :*  
  ```

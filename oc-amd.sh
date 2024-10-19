@@ -71,10 +71,12 @@ echo "manual" > ${path2card}/power_dpm_force_performance_level
 
 #set power
 pl="$(cat $link2oc | grep 'pl' | cut -d " " -f 3)000000"
+minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
 maxpl=$(cat ${path2card}/hwmon/hwmon*/power1_cap_max)
-if (( $pl <= $maxpl )); then
-	echo $pl > ${path2card}/hwmon/hwmon*/power1_cap
-fi
+echo $minpl > ${path2card}/hwmon/hwmon*/power1_cap #----------------since we cannot lower than cap_min
+#if (( $pl <= $maxpl )); then
+#	echo $pl > ${path2card}/hwmon/hwmon*/power1_cap
+#fi
 #set power profile
 #get index value of profile mode
 profile=$(cat $link2oc | grep 'profile' | cut -d " " -f 3)
