@@ -54,9 +54,10 @@ for ((i = 0 ; i < 10 ; i++)); do
 
             #set power
             pl="$(cat $ocFile | grep 'pl' | cut -d " " -f 3)000000"
+            minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
             maxpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_max)
             if (( $pl <= $maxpl )); then
-                echo $pl > ${pathToCard}/hwmon/hwmon*/power1_cap
+                echo $minpl > ${pathToCard}/hwmon/hwmon*/power1_cap #until we can figure a way to go even lower
             fi
             #set power profile
             #get index value of profile mode
