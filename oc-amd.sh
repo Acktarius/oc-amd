@@ -17,7 +17,16 @@ kill -INT $$
 }
 
 # get path to card
-path2card=/sys/class/drm/card0/device
+for ((card_num=0; card_num<=2; card_num++)); do
+    path2card="/sys/class/drm/card${card_num}/device"
+    if [ -d "${path2card}" ]; then
+        break
+    fi
+    if [ $card_num -eq 2 ]; then
+        echo "Error: No GPU device directory found (checked card0, card1, card2)"
+        exit 1
+    fi
+done
 
 device=$(cat ${path2card}/device)
 # expected device
@@ -100,10 +109,14 @@ mclk=$(cat $link2oc | grep 'mclk' | cut -d " " -f 3)
 echo $mclk > ${path2card}/pp_dpm_mclk
 
 #VDD_OFFSET
-vo=$(cat $link2oc | grep 'vo' | cut -d " " -f 3)
-echo "vo ${vo}" >  ${path2card}/pp_od_clk_voltage
-#COMMIT PP_OD_CLK_VOLTAGE
-echo "c" >  ${path2card}/pp_od_clk_voltage
+if [ -f "${path2card}/pp_od_clk_voltage" ]; then
+    vo=$(cat $link2oc | grep 'vo' | cut -d " " -f 3)
+    echo "vo ${vo}" > ${path2card}/pp_od_clk_voltage
+    #COMMIT PP_OD_CLK_VOLTAGE
+    echo "c" > ${path2card}/pp_od_clk_voltage
+else
+    echo "Warning: pp_od_clk_voltage not available for this GPU, skipping voltage offset"
+fi
 
 #set fan manual
 fmode=$(cat $link2oc | grep 'fmode' | cut -d " " -f 3)
@@ -116,10 +129,4 @@ echo "Done, happy hashing !"
 	;;
 esac
 
-fi
-
-# Add error checking for required files/directories
-if [ ! -d "${path2card}" ]; then
-    echo "Error: GPU device directory not found"
-    exit 1
 fi

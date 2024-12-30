@@ -14,6 +14,19 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 trip() {
 kill -INT $$
 }
+#Initial Card
+for ((card_num=0; card_num<=2; card_num++)); do
+    initialCardPath="/sys/class/drm/card${card_num}/device"
+    if [ -d "${initialCardPath}" ]; then
+        cardInit=$card_num
+        break
+    fi
+    if [ $card_num -eq 2 ]; then
+        echo "Error: No GPU device directory found (checked card0, card1, card2)"
+        exit 1
+    fi
+done
+
 
 
 # get path to card
@@ -22,7 +35,7 @@ echo $(readlink -f "/sys/class/drm/card${1}/device")
 }
 
 # loop through cards
-for ((i = 0 ; i < 10 ; i++)); do
+for ((i = $cardInit ; i < 10 ; i++)); do
     if [[ ! -d $(path2card $i) ]]; then
     break
     fi
@@ -80,13 +93,17 @@ for ((i = 0 ; i < 10 ; i++)); do
 	    fi
             
             #OS_SCLK
-            odsclk=$(cat $ocFile | grep 'odsclk' | cut -d " " -f 3)
-            echo "s 1 ${odsclk}" >  ${pathToCard}/pp_od_clk_voltage
-            #VDD_OFFSET
-            vo=$(cat $ocFile | grep 'vo' | cut -d " " -f 3)
-            echo "vo ${vo}" >  ${pathToCard}/pp_od_clk_voltage
-            #COMMIT PP_OD_CLK_VOLTAGE
-            echo "c" >  ${pathToCard}/pp_od_clk_voltage
+            if [ -f "${pathToCard}/pp_od_clk_voltage" ]; then
+                odsclk=$(cat $ocFile | grep 'odsclk' | cut -d " " -f 3)
+                echo "s 1 ${odsclk}" >  ${pathToCard}/pp_od_clk_voltage
+                #VDD_OFFSET
+                vo=$(cat $ocFile | grep 'vo' | cut -d " " -f 3)
+                echo "vo ${vo}" >  ${pathToCard}/pp_od_clk_voltage
+                #COMMIT PP_OD_CLK_VOLTAGE
+                echo "c" >  ${pathToCard}/pp_od_clk_voltage
+            else
+                echo "Warning: pp_od_clk_voltage not available for card${i}: ${card}, skipping voltage offset"
+            fi
 
             #set value for core clock
             sclk=$(cat $ocFile | grep 'Sclk' | cut -d " " -f 3)
@@ -106,9 +123,3 @@ for ((i = 0 ; i < 10 ; i++)); do
             esac
         fi
 done
-
-# Add error checking for any cards found
-if [ $i -eq 0 ]; then
-    echo "Error: No AMD graphics cards found"
-    exit 1
-fi
