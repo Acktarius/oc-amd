@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 # this file is subject to Licence
 #Copyright (c) 2023-2024, Acktarius
 ####################################

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 # this file is subject to Licence
 #Copyright (c) 2023-2024, Acktarius
 ####################################
@@ -121,11 +121,5 @@ fi
 # Add error checking for required files/directories
 if [ ! -d "${path2card}" ]; then
     echo "Error: GPU device directory not found"
-    exit 1
-fi
-
-# Add error checking for hardware mon directory
-if [ ! -d "${path2card}/hwmon/hwmon*" ]; then
-    echo "Error: Hardware monitoring directory not found"
     exit 1
 fi
