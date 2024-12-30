@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 # this file is subject to Licence
 #Copyright (c) 2023-2024, Acktarius
 ####################################
@@ -17,7 +17,7 @@ kill -INT $$
 }
 
 # get path to card
-path2card=$(readlink -f /sys/class/drm/card0/device)
+path2card=/sys/class/drm/card0/device
 
 device=$(cat ${path2card}/device)
 # expected device
@@ -37,13 +37,13 @@ else
 
 #fetch overclocks
 card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
-echo $card
-link2oc="/opt/conceal-toolbox/oc-amd/oc_start_${card}.txt"
+echo "$card"
+link2oc="${SCRIPT_DIR}/oc_start_${card}.txt"
 
 #check oc file exist	
 if [[ ! -f "$link2oc" ]]; then
-echo "no oc file"
-trip
+    echo "Error: Overclock configuration file not found: $link2oc"
+    trip
 fi
 
 
@@ -71,12 +71,14 @@ echo "manual" > ${path2card}/power_dpm_force_performance_level
 
 #set power
 pl="$(cat $link2oc | grep 'pl' | cut -d " " -f 3)000000"
-minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
+minpl=$(cat ${path2card}/hwmon/hwmon*/power1_cap_min)
 maxpl=$(cat ${path2card}/hwmon/hwmon*/power1_cap_max)
-echo $minpl > ${path2card}/hwmon/hwmon*/power1_cap #----------------since we cannot lower than cap_min
-#if (( $pl <= $maxpl )); then
-#	echo $pl > ${path2card}/hwmon/hwmon*/power1_cap
-#fi
+# echo $minpl > ${path2card}/hwmon/hwmon*/power1_cap #----------------since we cannot lower than cap_min
+if (( $pl >= $minpl )) && (( $pl <= $maxpl )); then
+	echo $pl > ${path2card}/hwmon/hwmon*/power1_cap
+else
+	echo "Warning: Power limit $pl is outside allowed range ($minpl - $maxpl)"
+fi
 #set power profile
 #get index value of profile mode
 profile=$(cat $link2oc | grep 'profile' | cut -d " " -f 3)
@@ -114,4 +116,16 @@ echo "Done, happy hashing !"
 	;;
 esac
 
+fi
+
+# Add error checking for required files/directories
+if [ ! -d "${path2card}" ]; then
+    echo "Error: GPU device directory not found"
+    exit 1
+fi
+
+# Add error checking for hardware mon directory
+if [ ! -d "${path2card}/hwmon/hwmon*" ]; then
+    echo "Error: Hardware monitoring directory not found"
+    exit 1
 fi

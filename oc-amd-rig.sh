@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 # this file is subject to Licence
 #Copyright (c) 2023-2024, Acktarius
 ####################################
@@ -27,13 +27,13 @@ for ((i = 0 ; i < 10 ; i++)); do
     break
     fi
         pathToCard=$(path2card $i)
-        device=$(echo $(cat ${pathToCard}/device))
-        revision=$(echo $(cat ${pathToCard}/revision)) || $(echo "null")
+        device=$(cat "${pathToCard}/device")
+        revision=$(cat "${pathToCard}/revision" 2>/dev/null || echo "null")
         card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
         ocFile="oc_start_${card}.txt"
         #check oc file exist
         if [[ ! -f "$ocFile" ]]; then
-        echo "no oc file for card${i} : ${card}"
+        echo "Error: No overclock file found for card${i}: ${card}"
         else
             # oc or reset ?
             case "$1" in
@@ -56,8 +56,10 @@ for ((i = 0 ; i < 10 ; i++)); do
             pl="$(cat $ocFile | grep 'pl' | cut -d " " -f 3)000000"
             minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
             maxpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_max)
-            if (( $pl <= $maxpl )); then
-                echo $minpl > ${pathToCard}/hwmon/hwmon*/power1_cap #until we can figure a way to go even lower
+            if (( $pl >= $minpl )) && (( $pl <= $maxpl )); then
+                echo "$pl" > ${pathToCard}/hwmon/hwmon*/power1_cap
+            else
+                echo "Warning: Power limit $pl is outside allowed range ($minpl - $maxpl) for card${i}"
             fi
             #set power profile
             #get index value of profile mode
@@ -70,10 +72,10 @@ for ((i = 0 ; i < 10 ; i++)); do
 	     # CUSTOM selected, injection of Base clock and boost
 	    else
             declare -a neutral
-            neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${pathTocard}))
+            neutral=($(source ${SCRIPT_DIR}/getPPppm.sh ${pathToCard}))
             neutral[4]=$(cat $ocFile | grep 'baseCclk' | cut -d " " -f 3)
             neutral[6]=$(cat $ocFile | grep 'boostCclk' | cut -d " " -f 3)
-            echo "6 ${neutral[@]}" > ${pathTocard}/pp_power_profile_mode
+            echo "6 ${neutral[@]}" > ${pathToCard}/pp_power_profile_mode
             unset neutral
 	    fi
             
@@ -104,3 +106,9 @@ for ((i = 0 ; i < 10 ; i++)); do
             esac
         fi
 done
+
+# Add error checking for any cards found
+if [ $i -eq 0 ]; then
+    echo "Error: No AMD graphics cards found"
+    exit 1
+fi
