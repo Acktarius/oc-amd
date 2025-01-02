@@ -1,0 +1,11 @@
+perf = manual
+profile = CUSTOM
+baseCclk = 1100
+boostCclk = 988
+pl = 199
+odsclk = 2440
+Sclk = 1
+mclk = 1
+fmode = 1
+fspeed = 190
+vo = -85

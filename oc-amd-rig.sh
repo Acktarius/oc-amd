@@ -36,11 +36,20 @@ echo $(readlink -f "/sys/class/drm/card${1}/device")
 
 # loop through cards
 for ((i = $cardInit ; i < 10 ; i++)); do
-    if [[ ! -d $(path2card $i) ]]; then
-    break
+    pathToCard=$(path2card $i)
+    if [[ ! -d ${pathToCard} ]]; then
+        break
     fi
-        pathToCard=$(path2card $i)
-        device=$(cat "${pathToCard}/device")
+    device=$(cat "${pathToCard}/device")        
+            case "${device}" in
+                "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+                    # These are the devices we want to process
+                    ;;
+                *)
+                    echo "Skipping card${i}: unsupported device ID ${device}"
+                    continue
+                    ;;
+            esac  
         revision=$(cat "${pathToCard}/revision" 2>/dev/null || echo "null")
         card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
         ocFile="oc_start_${card}.txt"

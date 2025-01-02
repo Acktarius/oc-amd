@@ -20,23 +20,36 @@ kill -INT $$
 for ((card_num=0; card_num<=2; card_num++)); do
     path2card="/sys/class/drm/card${card_num}/device"
     if [ -d "${path2card}" ]; then
-        break
+        device=$(cat ${path2card}/device)
+        case "${device}" in
+            "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+                break
+                ;;
+            *)
+                echo "Skipping card${card_num}: unsupported device ID ${device}"
+                continue
+                ;;
+        esac  
     fi
     if [ $card_num -eq 2 ]; then
-        echo "Error: No GPU device directory found (checked card0, card1, card2)"
+        echo "Error: No supported GPU device found (checked card0, card1, card2)"
         exit 1
     fi
 done
 
-device=$(cat ${path2card}/device)
+
 # expected device
 # RX6400 or RX6500 or RX6500XT = 0x743f
 # RX6600 or RX6600XT = 0x73ff
 # RX6650XT = 0x73ef
+# RX7800XT = 0x747e
 
 revision=$(cat ${path2card}/revision)
 
-if [[ "${device}" != "0x743f" ]] && [[ "${device}" != "0x73ff" ]] && [[ "${device}" != "0x73ef" ]] ; then
+if [[ "${device}" != "0x743f" ]] && \
+[[ "${device}" != "0x73ff" ]] && \
+[[ "${device}" != "0x73ef" ]] && \
+[[ "${device}" != "0x747e" ]] ; then
 echo "$device"
 echo "your device is not supported"
 sleep 2

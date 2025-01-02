@@ -7,7 +7,7 @@
 # RX6400 or RX6500 or RX6500XT = 0x743f
 # RX6600 or RX6600XT = 0x73ff
 # RX6650XT = 0x73ef
-
+# RX7800XT = 0x747e
 
 #trip
 trip() {
@@ -63,6 +63,16 @@ case "$1" in
         case "$2" in
                 "0xc3")
                 card="RX6800"
+                ;;
+                *)
+                card="unknown"
+                ;;
+        esac
+        ;;
+# RX 7800XT
+       "0x747e")
+        case "$2" in
+                card="RX7800XT"
                 ;;
                 *)
                 card="unknown"
