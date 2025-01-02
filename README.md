@@ -28,17 +28,25 @@ oc-amd is a bash script which can be launch as a service to setup overclock pre 
 the value within oc_start_*.txt file will be used to set performance mode, pl, mem , fan
 
 when done:  
-`./oc-amd.sh reset`
+`sudo ./oc-amd.sh reset`
 ###
 
 ### for a rig  
 `sudo ./oc-amd-rig.sh`  
 This script will go through all your cards and if find an oc_start_*.txt file will apply it.
 
+## You can also install a graphical launcher applications:
+```bash
+sudo ./shortcut_creator.sh
+```
+This will create an easy-to-use launcher that can apply or reset your overclock settings.
+And set up the required polkit policy for elevated privileges.
+
+
 ---
 
 ## Modify core clock  
-*this is only not taken care of by the rig script, follow the next steps if you wish to change those values*  
+*this is only taken care of by the rig script, follow the next steps if you wish to change those values manually*  
 ### reference : [https://wiki.gentoo.org/wiki/AMDGPU](https://wiki.gentoo.org/wiki/AMDGPU)  
 *exemple for card0, as root :*  
  ```
