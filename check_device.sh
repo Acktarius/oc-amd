@@ -72,6 +72,7 @@ case "$1" in
 # RX 7800XT
        "0x747e")
         case "$2" in
+				"0xc8")
                 card="RX7800XT"
                 ;;
                 *)
