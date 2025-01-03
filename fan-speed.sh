@@ -1,7 +1,7 @@
 #!/bin/bash
 #regulate GPU temp
 # this file is subject to Licence
-#Copyright (c) 2023, Acktarius
+#Copyright (c) 2023-2025, Acktarius
 ##################################################################
 case "$TERM" in
         xterm-256color)
@@ -20,79 +20,41 @@ case "$TERM" in
         ;;
 esac
 
+#declaration variables and functions
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 #trip
 trip() {
 kill -INT $$
 }
 
-# get path to card
-path2card=$(readlink -f /sys/class/drm/card0/device)
-device=$(cat ${path2card}/device)
-revision=$(cat ${path2card}/revision)
-#testgpu=$(glxinfo | grep -c "RX 6400")
-if [[ "${device}" != "0x743f" ]] && [[ "${device}" != "0x73ff" ]] && [[ "${device}" != "0x73ef" ]] ; then
-echo "your gpu is not supported"
-sleep 2
-exit
+# get path to first known AMD card
+for ((card_num=0; card_num<=2; card_num++)); do
+    path2card="/sys/class/drm/card${card_num}/device"
+    if [ -d "${path2card}" ]; then
+        device=$(cat ${path2card}/device)
+        case "${device}" in
+            "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+                break
+                ;;
+            *)
+                echo "Skipping card${card_num}: unsupported device ID ${device}"
+                continue
+                ;;
+        esac  
+    fi
+    if [ $card_num -eq 2 ]; then
+        echo "Error: No supported GPU device found (checked card0, card1, card2)"
+        sleep 2
+		exit 1
+    fi
+done
 
-else
+revision=$(cat ${path2card}/revision)
 
 #fetch overclocks
-
-case "$device" in
-# RX6400 or RX6500 or RX6500XT
-	"0x743f")
-	case "$revision" in
-		"0xc7")
-		card="RX6400"
-		;;
-		"0xc3")
-		card="RX6500"
-		;;
-		"0xc1")
-		card="RX6500XT"
-		;;
-		*)
-		echo "unexpected card revision"
-		trip
-		;;
-	esac
-	;;
-# RX6600 series
-	"0x73ff")
-	case "$revision" in
-		"0xc7")
-		card="RX6600"
-		;;
-		"0xc1")
-		card="RX6600XT"
-		;;
-		*)
-		echo "unexpected card revision"
-                trip
-		;;
-	esac
-	;;
-# RX 6650XT
-	"0x73ef")
-	case "$revision" in
-		"0xc1")
-		card="RX6650XT"
-		;;
-		*)
-		echo "unexpected card revision"
-                trip
-		;;
-	esac
-	;;
-	*)
-echo "unexpected error"
-sleep 2
-exit
-	;;
-esac
-
-link2oc="/opt/conceal-toolbox/oc-amd/oc_start_${card}.txt"
+card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
+link2oc="${SCRIPT_DIR}/oc_start_${card}.txt"
 
 #check oc file exist	
 if [[ ! -f "$link2oc" ]]; then
@@ -102,7 +64,7 @@ fi
 
 
 #get actual edge temp
-gput=$(sensors | grep "edge" | cut -d "+" -f 2 | cut -d "." -f 1)
+gput=$(sensors | grep "edge" | grep "crit" | cut -d "+" -f 2 | cut -d "." -f 1)
 echo -e "actual gpu edge temperature is ${ORANGE}${gput}${TURNOFF}"
 #fan present mining setting
 fspeed=$(cat ${path2card}/hwmon/hwmon*/pwm1)
@@ -250,4 +212,4 @@ sleep 4
 fi
 exit
 
-fi
+
