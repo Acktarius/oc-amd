@@ -1,6 +1,6 @@
 #!/bin/bash
 # this file is subject to Licence
-#Copyright (c) 2023-2024, Acktarius
+#Copyright (c) 2023-2025, Acktarius
 ####################################
 #test card is a RX6400
 #glxinfo doesn't work when called from a service
