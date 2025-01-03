@@ -42,6 +42,7 @@ done
 # RX6400 or RX6500 or RX6500XT = 0x743f
 # RX6600 or RX6600XT = 0x73ff
 # RX6650XT = 0x73ef
+# RX6800XT = 0x73bf
 # RX7800XT = 0x747e
 
 revision=$(cat ${path2card}/revision)
@@ -49,6 +50,7 @@ revision=$(cat ${path2card}/revision)
 if [[ "${device}" != "0x743f" ]] && \
 [[ "${device}" != "0x73ff" ]] && \
 [[ "${device}" != "0x73ef" ]] && \
+[[ "${device}" != "0x73bf" ]]&& \
 [[ "${device}" != "0x747e" ]] ; then
 echo "$device"
 echo "your device is not supported"

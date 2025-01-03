@@ -42,7 +42,7 @@ for ((i = $cardInit ; i < 10 ; i++)); do
     fi
     device=$(cat "${pathToCard}/device")        
             case "${device}" in
-                "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+                "0x743f"|"0x73ff"|"0x73ef"|"0x73bf"|"0x747e")
                     # These are the devices we want to process
                     ;;
                 *)
