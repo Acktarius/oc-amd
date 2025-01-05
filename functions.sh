@@ -21,5 +21,5 @@ get_supported_devices() {
         to_entries[] | 
         select(.value.revision | to_entries[] | 
             .value | match($pattern)
-        ) | .key' "$DEVICES_JSON" | sort -u | tr '\n' ' ' | sed 's/ *$//' | sed 's/ / | /g')
+        ) | .key' "$DEVICES_JSON" | sort -u | tr '\n' '|' | sed 's/|$//')
 } 

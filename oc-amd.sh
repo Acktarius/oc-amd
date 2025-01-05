@@ -27,15 +27,12 @@ for ((card_num=0; card_num<=2; card_num++)); do
     path2card="/sys/class/drm/card${card_num}/device"
     if [ -d "${path2card}" ]; then
         device=$(cat ${path2card}/device)
-        case "${device}" in
-            ${supported_devices})
-                break
-                ;;
-            *)
-                echo "Skipping card${card_num}: unsupported device ID ${device}"
-                continue
-                ;;
-        esac  
+        if [[ "${device}" =~ ^(${supported_devices})$ ]]; then
+            break
+        else
+            echo "Skipping card${card_num}: unsupported device ID ${device}"
+            continue
+        fi
     fi
     if [ $card_num -eq 2 ]; then
         echo "Error: No supported GPU device found (checked card0, card1, card2)"

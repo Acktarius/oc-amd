@@ -47,56 +47,51 @@ for ((i = $cardInit ; i < 10 ; i++)); do
         break
     fi
     device=$(cat "${pathToCard}/device")        
-            case "${device}" in
-                ${supported_devices})
-                    # These are the devices we want to process
-                    ;;
-                *)
-                    echo "Skipping card${i}: unsupported device ID ${device}"
-                    continue
-                    ;;
-            esac  
-        revision=$(cat "${pathToCard}/revision" 2>/dev/null || echo "null")
-        card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
-        ocFile="oc_start_${card}.txt"
-        #check oc file exist
-        if [[ ! -f "$ocFile" ]]; then
-        echo "Error: No overclock file found for card${i}: ${card}"
+    if [[ ! "${device}" =~ ^(${supported_devices})$ ]]; then
+        echo "Skipping card${i}: unsupported device ID ${device}"
+        continue
+    fi
+    revision=$(cat "${pathToCard}/revision" 2>/dev/null || echo "null")
+    card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
+    ocFile="oc_start_${card}.txt"
+    #check oc file exist
+    if [[ ! -f "$ocFile" ]]; then
+    echo "Error: No overclock file found for card${i}: ${card}"
+    else
+        # oc or reset ?
+        case "$1" in
+            reset|R)
+
+        #set power to default ------------------------------------------------------------------- < reset
+        pldefault=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_default)
+        echo $pldefault > ${pathToCard}/hwmon/hwmon*/power1_cap
+        #set fan auto
+        echo 2 > ${pathToCard}/hwmon/hwmon*/pwm1_enable
+        #Set performance to auto
+        echo "auto" > ${pathToCard}/power_dpm_force_performance_level
+        echo -e "card${i} : ${card} overclocks reset" 
+	 ;;
+            *)
+        #set  Performance to manual ------------------------------------------------------------- < over-clocking
+        echo "manual" > ${pathToCard}/power_dpm_force_performance_level
+
+        #set power
+        pl="$(cat $ocFile | grep 'pl' | cut -d " " -f 3)000000"
+        minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
+        maxpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_max)
+        if (( $pl >= $minpl )) && (( $pl <= $maxpl )); then
+            echo "$pl" > ${pathToCard}/hwmon/hwmon*/power1_cap
         else
-            # oc or reset ?
-            case "$1" in
-                reset|R)
-
-            #set power to default ------------------------------------------------------------------- < reset
-            pldefault=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_default)
-            echo $pldefault > ${pathToCard}/hwmon/hwmon*/power1_cap
-            #set fan auto
-            echo 2 > ${pathToCard}/hwmon/hwmon*/pwm1_enable
-            #Set performance to auto
-            echo "auto" > ${pathToCard}/power_dpm_force_performance_level
-            echo -e "card${i} : ${card} overclocks reset" 
-		 ;;
-                *)
-            #set  Performance to manual ------------------------------------------------------------- < over-clocking
-            echo "manual" > ${pathToCard}/power_dpm_force_performance_level
-
-            #set power
-            pl="$(cat $ocFile | grep 'pl' | cut -d " " -f 3)000000"
-            minpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_min)
-            maxpl=$(cat ${pathToCard}/hwmon/hwmon*/power1_cap_max)
-            if (( $pl >= $minpl )) && (( $pl <= $maxpl )); then
-                echo "$pl" > ${pathToCard}/hwmon/hwmon*/power1_cap
-            else
-                echo "Warning: Power limit $pl is outside allowed range ($minpl - $maxpl) for card${i}"
+            echo "Warning: Power limit $pl is outside allowed range ($minpl - $maxpl) for card${i}"
+        fi
+        #set power profile
+        #get index value of profile mode
+        profile=$(cat $ocFile | grep 'profile' | cut -d " " -f 3)
+        mode=$(cat ${pathToCard}/pp_power_profile_mode | grep $profile | tr -s " " | cut -d " " -f 2)
+        if [[ "$profile" != "CUSTOM" ]]; then 
+	        if  [[ "$mode" =~ ^[0-9]+$ ]]; then
+            echo $mode > ${pathToCard}/pp_power_profile_mode
             fi
-            #set power profile
-            #get index value of profile mode
-            profile=$(cat $ocFile | grep 'profile' | cut -d " " -f 3)
-            mode=$(cat ${pathToCard}/pp_power_profile_mode | grep $profile | tr -s " " | cut -d " " -f 2)
-            if [[ "$profile" != "CUSTOM" ]]; then 
-	            if  [[ "$mode" =~ ^[0-9]+$ ]]; then
-                echo $mode > ${pathToCard}/pp_power_profile_mode
-                fi
 	     # CUSTOM selected, injection of Base clock and boost
 	    else
             declare -a neutral
@@ -137,4 +132,5 @@ for ((i = $cardInit ; i < 10 ; i++)); do
                 ;;
             esac
         fi
+    fi
 done
