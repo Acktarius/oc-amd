@@ -170,7 +170,11 @@ echo "set label \"Copyright (c) 2023-2025, Acktarius\" at screen 0.5,0.01 center
 # Generate plot
 gnuplot /tmp/plot.gnu
 
-# Cleanup temporary files
-rm -f /tmp/card*_data.txt /tmp/plot.gnu
+# Save a copy of the plot script for debugging
+cp /tmp/plot.gnu "${records_dir}/plot_${timestamp}.gnu"
 
-echo "Recording complete. Chart saved as records/record_${timestamp}.png" 
+# Cleanup temporary files (removing plot.gnu from cleanup)
+rm -f /tmp/card*_data.txt
+
+echo "Recording complete. Chart saved as records/record_${timestamp}.png"
+echo "Plot script saved as records/plot_${timestamp}.gnu for debugging" 
