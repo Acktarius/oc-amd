@@ -10,6 +10,12 @@
 #declaration variables and functions
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Source shared functions
+source "${SCRIPT_DIR}/functions.sh"
+
+# Get list of supported devices
+get_supported_devices
+
 #trip
 trip() {
 kill -INT $$
@@ -42,7 +48,7 @@ for ((i = $cardInit ; i < 10 ; i++)); do
     fi
     device=$(cat "${pathToCard}/device")        
             case "${device}" in
-                "0x743f"|"0x73ff"|"0x73ef"|"0x73bf"|"0x747e")
+                ${supported_devices})
                     # These are the devices we want to process
                     ;;
                 *)

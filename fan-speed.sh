@@ -23,6 +23,12 @@ esac
 #declaration variables and functions
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Source shared functions
+source "${SCRIPT_DIR}/functions.sh"
+
+# Get list of supported devices
+get_supported_devices
+
 #trip
 trip() {
 kill -INT $$
@@ -34,7 +40,7 @@ for ((card_num=0; card_num<=2; card_num++)); do
     if [ -d "${path2card}" ]; then
         device=$(cat ${path2card}/device)
         case "${device}" in
-            "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+            ${supported_devices})
                 break
                 ;;
             *)

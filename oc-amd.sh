@@ -11,6 +11,12 @@
 #declaration variables and functions
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Source shared functions
+source "${SCRIPT_DIR}/functions.sh"
+
+# Get list of supported devices
+get_supported_devices
+
 #trip
 trip() {
 kill -INT $$
@@ -22,7 +28,7 @@ for ((card_num=0; card_num<=2; card_num++)); do
     if [ -d "${path2card}" ]; then
         device=$(cat ${path2card}/device)
         case "${device}" in
-            "0x743f"|"0x73ff"|"0x73ef"|"0x747e")
+            ${supported_devices})
                 break
                 ;;
             *)
@@ -37,25 +43,13 @@ for ((card_num=0; card_num<=2; card_num++)); do
     fi
 done
 
-
-# expected device
-# RX6400 or RX6500 or RX6500XT = 0x743f
-# RX6600 or RX6600XT = 0x73ff
-# RX6650XT = 0x73ef
-# RX6800XT = 0x73bf
-# RX7800XT = 0x747e
-
 revision=$(cat ${path2card}/revision)
 
-if [[ "${device}" != "0x743f" ]] && \
-[[ "${device}" != "0x73ff" ]] && \
-[[ "${device}" != "0x73ef" ]] && \
-[[ "${device}" != "0x73bf" ]]&& \
-[[ "${device}" != "0x747e" ]] ; then
-echo "$device"
-echo "your device is not supported"
-sleep 2
-exit
+# Check if device is in our supported list
+if [[ ! "${device}" =~ ^(${supported_devices})$ ]]; then
+    echo "your device ${device} is not supported"
+    sleep 2
+    exit
 else
 
 

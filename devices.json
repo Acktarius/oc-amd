@@ -1,0 +1,56 @@
+{
+  "0x743f": {
+    "name": "RX6400/6500 Series",
+    "revision": {
+      "0xc7": "RX6400",
+      "0xc3": "RX6500",
+      "0xc1": "RX6500XT"
+    }
+  },
+  "0x73ff": {
+    "name": "RX6600 Series",
+    "revision": {
+      "0xc7": "RX6600",
+      "0xc1": "RX6600XT"
+    }
+  },
+  "0x73ef": {
+    "name": "RX6650 Series",
+    "revision": {
+      "0xc1": "RX6650XT"
+    }
+  },
+  "0x73bf": {
+    "name": "RX6800/6900 Series",
+    "revision": {
+      "0xc3": "RX6800",
+      "0xc1": "RX6800XT",
+      "0xc0": "RX6900XT"
+    }
+  },
+  "0x73df": {
+    "name": "RX6700/6750 Series",
+    "revision": {
+      "0xc0": "RX6750XT",
+      "0xc5": "RX6700XT"
+    }
+  },
+  "0x73a5": {
+    "name": "RX6950 Series",
+    "revision": {
+      "0xc0": "RX6950XT"
+    }
+  },
+  "0x747e": {
+    "name": "RX7800 Series",
+    "revision": {
+      "0xc8": "RX7800XT"
+    }
+  },
+  "0x744c": {
+    "name": "RX7900 Series",
+    "revision": {
+      "0xc8": "RX7900XT"
+    }
+  }
+}
