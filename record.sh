@@ -130,18 +130,11 @@ set y2label 'Power (W)'
 set y2range [0:350]
 set y2tics
 
-
-# Add copyright at the bottom
-set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
-
 # Increase margin below plot to make room for legend and label
 set bmargin 6
 
 # Move legend up slightly to make room for copyright
 set key at screen 0.2,0.04 Left reverse spacing 1.5 width -8
-
-# Add key title to explain line styles
-set label "Solid: GPU% / Dashed: Fan% / Dotted: Power(W)" at screen 0.5,0.04 center tc rgb "#fafafa"
 
 # Plot data
 plot \\
@@ -159,11 +152,14 @@ for ((i = cardInit; i < 10; i++)); do
         done
 
         # Add plot commands with appropriate axes
-        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$3*100.0/255.0) notitle with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$4/1000000.0) notitle with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]} (GPU% / Fan% / Power W)' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) notitle with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) notitle with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
+
+# Add copyright at the bottom of plot script
+echo "set label \"Copyright (c) 2023-2025, Acktarius\" at screen 0.5,0.01 center tc rgb \"#fafafa\"" >> /tmp/plot.gnu
 
 # Remove trailing comma and backslash
 sed -i '$ s/,\s*\\$//' /tmp/plot.gnu
