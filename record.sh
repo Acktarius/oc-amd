@@ -36,6 +36,13 @@ done
 
 # Initialize data collection arrays
 timestamp=$(date +%Y%m%d_%H%M%S)
+
+# Create records directory if it doesn't exist
+records_dir="${SCRIPT_DIR}/records"
+if [[ ! -d "$records_dir" ]]; then
+    mkdir -p "$records_dir"
+fi
+
 card_count=0
 
 # Collect data for 1 minute at 5-second intervals
@@ -80,20 +87,17 @@ echo -e "\nRecording complete. Generating chart..."
 # Generate gnuplot script for visualization
 cat > /tmp/plot.gnu << EOF
 set terminal pngcairo size 1200,800 enhanced font 'Arial,12'
-set output '${SCRIPT_DIR}/record_${timestamp}.png'
+set output '${records_dir}/record_${timestamp}.png'
 set title 'GPU Metrics Record on $(date)' font 'Arial,14'
 set xlabel 'Time (seconds)'
-set ylabel 'GPU Usage (%)'
+set ylabel 'GPU Usage / Fan Speed (%)'
 set yrange [0:100]
-set y2label 'Fan Speed / Power'
+set y2label 'Power (W)'
 set y2range [0:350]
 set y2tics
 set grid
-set key below
-
-# Define scaling factors
-fan_scale = 100.0/255.0  # Convert 0-255 to 0-100%
-power_scale = 1.0/1000000.0  # Convert µW to W
+set key below center Left reverse
+set key samplen 2 spacing 1.5 height 2
 
 # Plot data
 plot \\
@@ -107,16 +111,13 @@ for ((i = cardInit; i < 10; i++)); do
         # Create temporary data file with scaled values
         datafile="/tmp/card${i}_data.txt"
         for ((t=0; t<12; t++)); do
-            # Calculate scaled values
-            fan_percent=$(awk "BEGIN {printf \"%.2f\", ${fan_speed[$i,$t]} * 100 / 255}")
-            power_watts=$(awk "BEGIN {printf \"%.2f\", ${power_usage[$i,$t]} / 1000000}")
-            echo "$((t*5)) ${gpu_busy[$i,$t]} ${fan_percent} ${power_watts}" >> "$datafile"
+            echo "$((t*5)) ${gpu_busy[$i,$t]} ${fan_speed[$i,$t]} ${power_usage[$i,$t]}" >> "$datafile"
         done
 
         # Add plot commands with appropriate axes
         echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:3 title '${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:4 title '${card_names[$i]} Power(W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '${card_names[$i]} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
@@ -129,4 +130,4 @@ gnuplot /tmp/plot.gnu
 # Cleanup temporary files
 rm -f /tmp/card*_data.txt /tmp/plot.gnu
 
-echo "Recording complete. Chart saved as record_${timestamp}.png" 
+echo "Recording complete. Chart saved as records/record_${timestamp}.png" 
