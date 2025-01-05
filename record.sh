@@ -43,6 +43,11 @@ if [[ ! -d "$records_dir" ]]; then
     mkdir -p "$records_dir"
 fi
 
+# Create debug log file
+debug_log="${records_dir}/debug_${timestamp}.log"
+echo "Debug log for recording session ${timestamp}" > "$debug_log"
+echo "----------------------------------------" >> "$debug_log"
+
 card_count=0
 
 # Collect data for 1 minute at 5-second intervals
@@ -70,6 +75,13 @@ for ((t=0; t<12; t++)); do
         fi
 
         # Collect metrics
+        # Log raw values for debugging
+        echo "Time: $((t*5))s, Card: ${card_names[$i]}" >> "$debug_log"
+        echo "  GPU busy: $(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+        echo "  Fan speed: $(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+        echo "  Power usage: $(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+        echo "----------------------------------------" >> "$debug_log"
+
         gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0") || gpu_busy[$i,$t]=0
         fan_speed[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
         power_usage[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "0") || power_usage[$i,$t]=0

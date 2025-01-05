@@ -1,0 +1,5 @@
+# Ignore records directory
+records/
+
+# Ignore debug logs
+*.log 
