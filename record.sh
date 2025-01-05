@@ -25,6 +25,21 @@ path2card() {
     echo $(readlink -f "/sys/class/drm/card${1}/device")
 }
 
+# Function to find correct hwmon directory
+get_hwmon_dir() {
+    local card_path="$1"
+    
+    # Check hwmon1 first
+    if [[ -d "${card_path}/hwmon/hwmon1" ]]; then
+        echo "${card_path}/hwmon/hwmon1"
+    # Then check hwmon2
+    elif [[ -d "${card_path}/hwmon/hwmon2" ]]; then
+        echo "${card_path}/hwmon/hwmon2"
+    else
+        echo ""
+    fi
+}
+
 # Find initial card
 for ((card_num=0; card_num<=2; card_num++)); do
     initialCardPath="/sys/class/drm/card${card_num}/device"
@@ -75,16 +90,29 @@ for ((t=0; t<12; t++)); do
         fi
 
         # Collect metrics
+        # Get correct hwmon directory for this card
+        hwmon_dir=$(get_hwmon_dir "${pathToCard}")
+
         # Log raw values for debugging
         echo "Time: $((t*5))s, Card: ${card_names[$i]}" >> "$debug_log"
         echo "  GPU busy: $(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "ERROR")" >> "$debug_log"
-        echo "  Fan speed: $(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "ERROR")" >> "$debug_log"
-        echo "  Power usage: $(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+        if [[ -n "$hwmon_dir" ]]; then
+            echo "  Fan speed: $(cat "${hwmon_dir}/pwm1" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+            echo "  Power usage: $(cat "${hwmon_dir}/power1_average" 2>/dev/null || echo "ERROR")" >> "$debug_log"
+        else
+            echo "  Fan speed: ERROR (no hwmon1 or hwmon2 directory found)" >> "$debug_log"
+            echo "  Power usage: ERROR (no hwmon1 or hwmon2 directory found)" >> "$debug_log"
+        fi
         echo "----------------------------------------" >> "$debug_log"
 
         gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0") || gpu_busy[$i,$t]=0
-        fan_speed[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
-        power_usage[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "0") || power_usage[$i,$t]=0
+        if [[ -n "$hwmon_dir" ]]; then
+            fan_speed[$i,$t]=$(cat "${hwmon_dir}/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
+            power_usage[$i,$t]=$(cat "${hwmon_dir}/power1_average" 2>/dev/null || echo "0") || power_usage[$i,$t]=0
+        else
+            fan_speed[$i,$t]=0
+            power_usage[$i,$t]=0
+        fi
     done
     
     # Wait 5 seconds before next collection and show countdown
