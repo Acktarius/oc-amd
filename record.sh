@@ -63,9 +63,9 @@ for ((t=0; t<12; t++)); do
         fi
 
         # Collect metrics
-        gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0")
-        fan_speed[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "0")
-        power_usage[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "0")
+        gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0") || gpu_busy[$i,$t]=0
+        fan_speed[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
+        power_usage[$i,$t]=$(cat "${pathToCard}/hwmon/hwmon*/power1_average" 2>/dev/null || echo "0") || power_usage[$i,$t]=0
     done
     
     # Wait 5 seconds before next collection and show countdown
@@ -107,7 +107,10 @@ for ((i = cardInit; i < 10; i++)); do
         # Create temporary data file with scaled values
         datafile="/tmp/card${i}_data.txt"
         for ((t=0; t<12; t++)); do
-            echo "$((t*5)) ${gpu_busy[$i,$t]} $( echo "scale=2; ${fan_speed[$i,$t]}*$fan_scale" | bc) $(echo "scale=2; ${power_usage[$i,$t]}*$power_scale" | bc)" >> "$datafile"
+            # Calculate scaled values
+            fan_percent=$(awk "BEGIN {printf \"%.2f\", ${fan_speed[$i,$t]} * 100 / 255}")
+            power_watts=$(awk "BEGIN {printf \"%.2f\", ${power_usage[$i,$t]} / 1000000}")
+            echo "$((t*5)) ${gpu_busy[$i,$t]} ${fan_percent} ${power_watts}" >> "$datafile"
         done
 
         # Add plot commands with appropriate axes

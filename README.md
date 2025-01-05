@@ -6,6 +6,12 @@
 the script aim to set the performance mode to manual, to limit the power, to lower mem frequency, and increase the fan speed.  
 if you want to increase your core clock, follow the procedure indicated in last section.
 
+## Requirements
+
+- gnuplot: `sudo apt install gnuplot` (required for ploting metrics recorded)
+- jq: `sudo apt install jq` (required for device detection)
+- zenity: `sudo apt install zenity` (required for GUI)
+
 ## Install
 ideally place in the /opt folder
 
@@ -63,4 +69,5 @@ And set up the required polkit policy for elevated privileges.
 if you wish to revert your value :  
 ```
 echo 'r' > /sys/class/drm/card0/device/pp_od_clk_voltage
+```
 ```
