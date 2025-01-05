@@ -58,11 +58,6 @@ if [[ ! -d "$records_dir" ]]; then
     mkdir -p "$records_dir"
 fi
 
-# Create debug log file
-debug_log="${records_dir}/debug_${timestamp}.log"
-echo "Debug log for recording session ${timestamp}" > "$debug_log"
-echo "----------------------------------------" >> "$debug_log"
-
 card_count=0
 
 # Collect data for 1 minute at 5-second intervals
@@ -93,18 +88,6 @@ for ((t=0; t<12; t++)); do
         # Get correct hwmon directory for this card
         hwmon_dir=$(get_hwmon_dir "${pathToCard}")
 
-        # Log raw values for debugging
-        echo "Time: $((t*5))s, Card: ${card_names[$i]}" >> "$debug_log"
-        echo "  GPU busy: $(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "ERROR")" >> "$debug_log"
-        if [[ -n "$hwmon_dir" ]]; then
-            echo "  Fan speed: $(cat "${hwmon_dir}/pwm1" 2>/dev/null || echo "ERROR")" >> "$debug_log"
-            echo "  Power usage: $(cat "${hwmon_dir}/power1_average" 2>/dev/null || echo "ERROR")" >> "$debug_log"
-        else
-            echo "  Fan speed: ERROR (no hwmon1 or hwmon2 directory found)" >> "$debug_log"
-            echo "  Power usage: ERROR (no hwmon1 or hwmon2 directory found)" >> "$debug_log"
-        fi
-        echo "----------------------------------------" >> "$debug_log"
-
         gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0") || gpu_busy[$i,$t]=0
         if [[ -n "$hwmon_dir" ]]; then
             fan_speed[$i,$t]=$(cat "${hwmon_dir}/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
@@ -127,7 +110,18 @@ echo -e "\nRecording complete. Generating chart..."
 # Generate gnuplot script for visualization
 cat > /tmp/plot.gnu << EOF
 set terminal pngcairo size 1200,800 enhanced font 'Arial,12'
+set object 1 rectangle from screen 0,0 to screen 1,1 behind fillcolor rgb "#181a20" fillstyle solid 1.0
 set output '${records_dir}/record_${timestamp}.png'
+
+# Set text colors to #fafafa
+set border lc rgb "#fafafa"
+set xlabel tc rgb "#fafafa"
+set ylabel tc rgb "#fafafa"
+set y2label tc rgb "#fafafa"
+set title tc rgb "#fafafa"
+set key tc rgb "#fafafa"
+set tics textcolor rgb "#fafafa"
+
 set title 'GPU Metrics Record on $(date)' font 'Arial,14'
 set xlabel 'Time (seconds)'
 set ylabel 'GPU Usage / Fan Speed (%)'
@@ -135,9 +129,12 @@ set yrange [0:100]
 set y2label 'Power (W)'
 set y2range [0:350]
 set y2tics
-set grid
-set key below center Left reverse
-set key samplen 2 spacing 1.5 height 2
+
+# Add scale information
+set label "Fan % - Power W" at screen 0.5,0.03 center tc rgb "#fafafa"
+
+# Position legend below chart with one card per line
+set key below Left reverse spacing 1.5 width -8
 
 # Plot data
 plot \\
@@ -155,9 +152,9 @@ for ((i = cardInit; i < 10; i++)); do
         done
 
         # Add plot commands with appropriate axes
-        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '${card_names[$i]} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'Card${i} ${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Card${i} ${card_names[$i]} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
