@@ -21,6 +21,6 @@ get_supported_devices() {
         to_entries[] | 
         select(.value.revision | to_entries[] | 
             .value | match($pattern)
-        ) | "\"" + .key + "\""
-    ' "$DEVICES_JSON" | tr '\n' '|' | sed 's/|$//')
+        ) | .key
+    ' "$DEVICES_JSON" | tr '\n' ' ' | sed 's/[^ ]*/\"&\"/g' | sed 's/ / | /g' | sed 's/ | $//')
 } 
