@@ -149,21 +149,19 @@ for ((i = cardInit; i < 10; i++)); do
         done
 
         # Add plot commands with appropriate axes
-        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
         echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
         echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
-# Add a newline before copyright
-echo "" >> /tmp/plot.gnu
+# Remove trailing comma and backslash from the last plot command (now targeting the line before the copyright)
+sed -i '/set label/i\' /tmp/plot.gnu    # Add a newline before copyright line
+sed -i '/set label/!{/,\s*\\$/{$!b};s/,\s*\\$//}' /tmp/plot.gnu
 
 # Add copyright at the bottom of plot script
 echo "set label \"Copyright (c) 2023-2025, Acktarius\" at screen 0.5,0.01 center tc rgb \"#fafafa\"" >> /tmp/plot.gnu
 
-# Remove trailing comma and backslash from the last plot command (now targeting the line before the copyright)
-sed -i '/set label/i\' /tmp/plot.gnu    # Add a newline before copyright line
-sed -i '/set label/!{/,\s*\\$/{$!b};s/,\s*\\$//}' /tmp/plot.gnu
 
 # Generate plot
 gnuplot /tmp/plot.gnu
