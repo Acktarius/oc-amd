@@ -113,7 +113,7 @@ set terminal pngcairo size 1200,800 enhanced font 'Arial,12'
 set object 1 rectangle from screen 0,0 to screen 1,1 behind fillcolor rgb "#181a20" fillstyle solid 1.0
 set output '${records_dir}/record_${timestamp}.png'
 
-# Set text colors to #fafafa
+# Text colors
 set border lc rgb "#fafafa"
 set xlabel tc rgb "#fafafa"
 set ylabel tc rgb "#fafafa"
@@ -130,13 +130,10 @@ set y2label 'Power (W)'
 set y2range [0:350]
 set y2tics
 
-# Increase margin below plot to make room for legend and label
+# Margins and legend
 set bmargin 6
-
-# Move legend up slightly to make room for copyright
 set key at screen 0.2,0.04 Left reverse spacing 1.5 width -8
 
-# Plot data
 plot \\
 EOF
 
@@ -153,19 +150,20 @@ for ((i = cardInit; i < 10; i++)); do
 
         # Add plot commands with appropriate axes
         echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$3*100.0/255.0) title 'Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
-
-# Remove trailing comma and backslash from the last plot command
-sed -i '$ s/,\s*\\$//' /tmp/plot.gnu
 
 # Add a newline before copyright
 echo "" >> /tmp/plot.gnu
 
 # Add copyright at the bottom of plot script
 echo "set label \"Copyright (c) 2023-2025, Acktarius\" at screen 0.5,0.01 center tc rgb \"#fafafa\"" >> /tmp/plot.gnu
+
+# Remove trailing comma and backslash from the last plot command (now targeting the line before the copyright)
+sed -i '/set label/i\' /tmp/plot.gnu    # Add a newline before copyright line
+sed -i '/set label/!{/,\s*\\$/{$!b};s/,\s*\\$//}' /tmp/plot.gnu
 
 # Generate plot
 gnuplot /tmp/plot.gnu
