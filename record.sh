@@ -134,13 +134,13 @@ set y2tics
 set label "Fan % - Power W" at screen 0.5,0.08 center tc rgb "#fafafa"
 
 # Add copyright at the bottom
-set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.02 center tc rgb "#fafafa"
+set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
 
 # Increase margin below plot to make room for legend and label
-set bmargin 8
+set bmargin 10
 
 # Move legend up slightly to make room for copyright
-set key at screen 0.2,0.04 Left reverse spacing 1.5 width -8
+set key at screen 0.2,0.06 Left reverse spacing 1.5 width -8
 
 # Plot data
 plot \\
@@ -159,8 +159,8 @@ for ((i = cardInit; i < 10; i++)); do
 
         # Add plot commands with appropriate axes
         echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}: GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '  Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '  Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '  Fan%' with lines lw 2 lc rgb '${color}' dt 2 dashtype 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '  Power (W)' with lines lw 2 lc rgb '${color}' dt 3 dashtype 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
