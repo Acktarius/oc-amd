@@ -90,8 +90,8 @@ for ((t=0; t<12; t++)); do
 
         gpu_busy[$i,$t]=$(cat "${pathToCard}/gpu_busy_percent" 2>/dev/null || echo "0") || gpu_busy[$i,$t]=0
         if [[ -n "$hwmon_dir" ]]; then
-            fan_speed[$i,$t]=$(cat "${hwmon_dir}/pwm1" 2>/dev/null || echo "0") || fan_speed[$i,$t]=0
-            power_usage[$i,$t]=$(cat "${hwmon_dir}/power1_average" 2>/dev/null || echo "0") || power_usage[$i,$t]=0
+            fan_speed[$i,$t]=$(( $(cat "${hwmon_dir}/pwm1" 2>/dev/null) * 100 / 255 )) || fan_speed[$i,$t]=0
+            power_usage[$i,$t]=$(( $(cat "${hwmon_dir}/power1_average" 2>/dev/null) / 1000000 )) || power_usage[$i,$t]=0
         else
             fan_speed[$i,$t]=0
             power_usage[$i,$t]=0
@@ -161,8 +161,8 @@ for ((i = cardInit; i < 10; i++)); do
         card_id="Card${i} ${card_names[$i]}"
         # Plot all metrics for this card
         echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) with lines lw 2 lc rgb '${color}' dt 2 title '${card_id} Fan%', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:((\$4/1000000.0)) title '${card_id} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:3 title ' Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:4 title ' Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
