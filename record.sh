@@ -99,10 +99,14 @@ for ((t=0; t<12; t++)); do
     done
     
     # Wait 5 seconds before next collection and show countdown
+    spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇') 
     if [[ $t -lt 11 ]]; then
         time_left=$((total_time - (t+1)*5))
-        echo -ne "\rTime remaining: ${time_left} seconds...   "
-        sleep 5
+        for s in {1..5}; do
+            spin_idx=$(( (t*5 + s) % ${#spinner[@]} ))
+            echo -ne "\rTime remaining: ${time_left} seconds... ${spinner[$spin_idx]}   "
+            sleep 1
+        done
     fi
 done
 echo -e "\nRecording complete. Generating chart..."
@@ -159,7 +163,7 @@ for ((i = cardInit; i < 10; i++)); do
 done
 
 # Remove trailing comma and backslash from the last plot command
-sed -i 's/,\s*\\$//' /tmp/plot.gnu
+sed -i '$s/,\s*\\$//' /tmp/plot.gnu
 
 # Generate plot
 gnuplot /tmp/plot.gnu
@@ -172,3 +176,4 @@ rm -f /tmp/card*_data.txt
 
 echo "Recording complete. Chart saved as records/record_${timestamp}.png"
 echo "Plot script saved as records/plot_${timestamp}.gnu for debugging" 
+
