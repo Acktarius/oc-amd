@@ -99,7 +99,7 @@ for ((t=0; t<12; t++)); do
     done
     
     # Wait 5 seconds before next collection and show countdown
-    spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇') 
+    spinner=('⠋' '⠙' '⠸' '⠴' '⠦' '⠇') 
     if [[ $t -lt 11 ]]; then
         time_left=$((total_time - (t+1)*5))
         for s in {1..5}; do
@@ -157,8 +157,8 @@ for ((i = cardInit; i < 10; i++)); do
 
         # Add plot commands with appropriate axes
         echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'Fan%' with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '${card_names[$i]} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
