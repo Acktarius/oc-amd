@@ -172,9 +172,9 @@ gnuplot /tmp/plot.gnu
 
 # Save a copy of the plot script for debugging
 cp /tmp/plot.gnu "${records_dir}/plot_${timestamp}.gnu"
-
+cp /tmp/card*_data.txt "${records_dir}/
 # Cleanup temporary files (removing plot.gnu from cleanup)
-rm -f /tmp/card*_data.txt
+# rm -f /tmp/card*_data.txt
 
 echo "Recording complete. Chart saved as records/record_${timestamp}.png"
 echo "Plot script saved as records/plot_${timestamp}.gnu for debugging" 
