@@ -122,6 +122,9 @@ set title tc rgb "#fafafa"
 set key tc rgb "#fafafa"
 set tics textcolor rgb "#fafafa"
 
+# Set copyright label in the footer
+set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
+
 set title 'GPU Metrics Record on $(date)' font 'Arial,14'
 set xlabel 'Time (seconds)'
 set ylabel 'GPU Usage / Fan Speed (%)'
@@ -158,10 +161,6 @@ done
 # Remove trailing comma and backslash from the last plot command (now targeting the line before the copyright)
 sed -i '/set label/i\' /tmp/plot.gnu    # Add a newline before copyright line
 sed -i '/set label/!{/,\s*\\$/{$!b};s/,\s*\\$//}' /tmp/plot.gnu
-
-# Add copyright at the bottom of plot script
-echo "set label \"Copyright (c) 2023-2025, Acktarius\" at screen 0.5,0.01 center tc rgb \"#fafafa\"" >> /tmp/plot.gnu
-
 
 # Generate plot
 gnuplot /tmp/plot.gnu
