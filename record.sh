@@ -127,7 +127,7 @@ set key tc rgb "#fafafa"
 set tics textcolor rgb "#fafafa"
 
 # Set copyright label in the footer
-set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
+# set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
 
 set title 'GPU Metrics Record on $(date)' font 'Arial,14'
 set xlabel 'Time (seconds)'
@@ -158,10 +158,9 @@ for ((i = cardInit; i < 10; i++)); do
         done
 
         # Store card identifier for consistent legend entries
-        card_id="Card${i} ${card_names[$i]}"
-        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}: GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'FAN%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}: GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title ' FAN%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title ' Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
