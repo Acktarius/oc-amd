@@ -127,7 +127,7 @@ set key tc rgb "#fafafa"
 set tics textcolor rgb "#fafafa"
 
 # Set copyright label in the footer
-# set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
+set label "Copyright (c) 2023-2025, Acktarius" at screen 0.5,0.01 center tc rgb "#fafafa"
 
 set title 'GPU Metrics Record on $(date)' font 'Arial,14'
 set xlabel 'Time (seconds)'
