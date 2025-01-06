@@ -127,10 +127,10 @@ for ((i = $cardInit ; i < 10 ; i++)); do
             #set fan speed
             fspeed=$(cat $ocFile | grep 'fspeed' | cut -d " " -f 3)
             echo $fspeed > ${pathToCard}/hwmon/hwmon*/pwm1    
-	    echo  -e "oc applied to card${i} : ${card} \n"
+	        echo  -e "oc applied to card${i} : ${card} \n"
      		
                 ;;
-            esac
-        fi
+        esac
+       
     fi
 done
