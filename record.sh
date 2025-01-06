@@ -155,10 +155,11 @@ for ((i = cardInit; i < 10; i++)); do
             echo "$((t*5)) ${gpu_busy[$i,$t]} ${fan_speed[$i,$t]} ${power_usage[$i,$t]}" >> "$datafile"
         done
 
-        # Add plot commands with appropriate axes
-        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '${card_names[$i]} Fan%' with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '${card_names[$i]} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        # Store card identifier for consistent legend entries
+        card_id="Card${i} ${card_names[$i]}"
+        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}: GPU% / Fan% / Power (W)' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) notitle with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) notitle with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
