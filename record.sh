@@ -159,9 +159,10 @@ for ((i = cardInit; i < 10; i++)); do
 
         # Store card identifier for consistent legend entries
         card_id="Card${i} ${card_names[$i]}"
-        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$3*100.0/255.0) title '  Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'' using 1:(\$4/1000000.0) title '  Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        # Plot all metrics for this card
+        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title '${card_id} Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title '${card_id} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
