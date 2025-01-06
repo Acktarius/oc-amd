@@ -161,7 +161,7 @@ for ((i = cardInit; i < 10; i++)); do
         card_id="Card${i} ${card_names[$i]}"
         # Plot all metrics for this card
         echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id} GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' title '${card_id} Fan%' using 1:(\$3*100.0/255.0) with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) with lines lw 2 lc rgb '${color}' dt 2 title '${card_id} Fan%', \\" >> /tmp/plot.gnu
         echo "'/tmp/card${i}_data.txt' using 1:((\$4/1000000.0)) title '${card_id} Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
