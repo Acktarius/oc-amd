@@ -53,7 +53,7 @@ for ((i = $cardInit ; i < 10 ; i++)); do
     fi
     revision=$(cat "${pathToCard}/revision" 2>/dev/null || echo "null")
     card=$(source ${SCRIPT_DIR}/check_device.sh $device $revision)
-    ocFile="oc_start_${card}.txt"
+    ocFile="${SCRIPT_DIR}/oc_start_${card}.txt"
     #check oc file exist
     if [[ ! -f "$ocFile" ]]; then
     echo "Error: No overclock file found for card${i}: ${card}"
@@ -70,8 +70,8 @@ for ((i = $cardInit ; i < 10 ; i++)); do
         #Set performance to auto
         echo "auto" > ${pathToCard}/power_dpm_force_performance_level
         echo -e "card${i} : ${card} overclocks reset" 
-	 ;;
-            *)
+	    ;;
+        *)
         #set  Performance to manual ------------------------------------------------------------- < over-clocking
         echo "manual" > ${pathToCard}/power_dpm_force_performance_level
 
@@ -129,7 +129,7 @@ for ((i = $cardInit ; i < 10 ; i++)); do
             echo $fspeed > ${pathToCard}/hwmon/hwmon*/pwm1    
 	        echo  -e "oc applied to card${i} : ${card} \n"
      		
-                ;;
+        ;;
         esac
        
     fi
