@@ -158,9 +158,8 @@ for ((i = cardInit; i < 10; i++)); do
     fi
 done
 
-# Remove trailing comma and backslash from the last plot command (now targeting the line before the copyright)
-sed -i '/set label/i\' /tmp/plot.gnu    # Add a newline before copyright line
-sed -i '/set label/!{/,\s*\\$/{$!b};s/,\s*\\$//}' /tmp/plot.gnu
+# Remove trailing comma and backslash from the last plot command
+sed -i 's/,\s*\\$//' /tmp/plot.gnu
 
 # Generate plot
 gnuplot /tmp/plot.gnu
