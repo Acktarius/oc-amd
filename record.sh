@@ -158,9 +158,10 @@ for ((i = cardInit; i < 10; i++)); do
         done
 
         # Store card identifier for consistent legend entries
-        echo "'/tmp/card${i}_data.txt' using 1:2 title 'Card${i} ${card_names[$i]}: GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title ' FAN%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title ' Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        card_id="Card${i} ${card_names[$i]}"
+        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'' using 1:(\$3*100.0/255.0) title '  Fan%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'' using 1:(\$4/1000000.0) title '  Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
@@ -170,13 +171,9 @@ sed -i '$s/,\s*\\$//' /tmp/plot.gnu
 # Generate plot
 gnuplot /tmp/plot.gnu
 
-# Save a copy of the plot script for debugging
-cp /tmp/plot.gnu "${records_dir}/plot_${timestamp}.gnu"
-cp /tmp/card*_data.txt "${records_dir}
-
 # Cleanup temporary files (removing plot.gnu from cleanup)
-# rm -f /tmp/card*_data.txt
+rm -f /tmp/card*_data.txt
 
 echo "Recording complete. Chart saved as records/record_${timestamp}.png"
-echo "Plot script saved as records/plot_${timestamp}.gnu for debugging" 
+
 
