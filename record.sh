@@ -136,10 +136,12 @@ set yrange [0:100]
 set y2label 'Power (W)'
 set y2range [0:350]
 set y2tics
+set grid xtics ytics y2tics
+set grid lt 1 lc rgb "#333333"
 
 # Margins and legend
 set bmargin 6
-set key at screen 0.2,0.04 Left reverse spacing 1.5 width -8
+set key at screen 0.2,0.04 Left reverse spacing 1.2 width -10 height 1
 
 plot \\
 EOF
@@ -157,9 +159,9 @@ for ((i = cardInit; i < 10; i++)); do
 
         # Store card identifier for consistent legend entries
         card_id="Card${i} ${card_names[$i]}"
-        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}: GPU% / Fan% / Power (W)' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) notitle with lines lw 2 lc rgb '${color}' dt 2 axes x1y1, \\" >> /tmp/plot.gnu
-        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) notitle with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:2 title '${card_id}: GPU%' with lines lw 2 lc rgb '${color}', \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$3*100.0/255.0) title 'FAN%' with lines lw 2 lc rgb '${color}' dt 2, \\" >> /tmp/plot.gnu
+        echo "'/tmp/card${i}_data.txt' using 1:(\$4/1000000.0) title 'Power (W)' with lines lw 2 lc rgb '${color}' dt 3 axes x1y2, \\" >> /tmp/plot.gnu
     fi
 done
 
