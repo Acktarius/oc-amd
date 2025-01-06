@@ -172,7 +172,8 @@ gnuplot /tmp/plot.gnu
 
 # Save a copy of the plot script for debugging
 cp /tmp/plot.gnu "${records_dir}/plot_${timestamp}.gnu"
-cp /tmp/card*_data.txt "${records_dir}/
+cp /tmp/card*_data.txt "${records_dir}
+
 # Cleanup temporary files (removing plot.gnu from cleanup)
 # rm -f /tmp/card*_data.txt
 
